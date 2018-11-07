@@ -1,0 +1,60 @@
+---
+title: "InitThought"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+R Markdown
+
+General form (following Caswell)
+
+ P=(U|0)
+   (m|1)
+
+U=matrix(c( hh, 0,  0,
+            hs, ss, 0,
+            0,  sS, SS), 3, 3)
+
+Problem: find U / P1=U%*%P0 (3x1=1x3%*%3x3): 5 parameters
+
+First approach: resolve a lineal system for 3 single ages to use a square matrix
+
+```{r}
+P0=matrix(c(70,20,10, 73,19,8, 69,22,9),3,3)/100
+P1=matrix(c(67,22,11, 70,20,10, 66,24,10),3,3)/100
+sum(P0);sum(P1)
+
+I=solve(P0)              
+U=P1%*%I
+U%*%P0
+
+#optim
+#función a optimizar
+fn <- function(hh,hs,ss,sS,SS){
+  P0=matrix(c(70,20,10, 73,19,8, 69,22,9),3,3)/100
+  P1=matrix(c(67,22,11, 70,20,10, 66,24,10),3,3)/100
+  U=matrix(c( hh, 0,  0, hs, ss, 0, 0,  sS, SS) ,3,3)
+  sum((P1-U%*%P0)^2)
+}
+
+#desigualdades
+hin<-function(p){
+  
+}
+
+#doesn´t work
+
+# p_initial<-c(.8,.1,.8,.2,.8)
+# fn(p_initial)
+
+#work!
+fn(.8,.1,.8,.2,.8)
+
+#library("alabama")
+#auglag(par = c(.8,.1,.8,.2,.8), fn = fn)
+```
+
+
+
