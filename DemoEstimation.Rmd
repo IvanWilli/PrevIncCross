@@ -1,0 +1,150 @@
+---
+title: "Demogr App"
+output: html_document
+---
+
+##Introduction
+The objective of this work is get used of demographic techniques to aboard the dynamic multistate problem in health models where there isn't data about flow transitions. 
+In general, we talk about a closed population with no memory transition (Markov assumption), with only one change by period.
+   
+The matrix of transition rates is the main result. In this case we have $s$ living and a death state.
+
+$$U_{x}^{t} = \left(\begin{array}{cccc} 
+                 -\sum_{i=2}^{s}m_{x,1i}^{t}-m_{x,1d}^{t} & m_{x,12}^{t} & \cdots &                             m_{x,1s}^{t} & m_{x,1d}^{t}\\ 
+                 m_{x,21}^{t} & \ddots & \cdots & m_{x,2s}^{t} & m_{x,2d}^{t}\\
+                 \vdots & \vdots & \ddots & \vdots & \vdots\\ 
+                 m_{x,s1}^{t} & \cdots & \cdots & -\sum_{i=1}^{s-1}m_{x,si}^{t}-m_{x,sd}^{t} &                  m_{x,sd}^{t}\\
+                 0 & 0 & \cdots & \cdots & 0\\
+                \end{array}\right)$$
+
+For demographic purposes like decrement tables construction, the construction of a matrix of probabilities can be donde with an assumption about the rates under the period risk. Under the constant assumption we would have an exponential relationship $P_{x}^{t,h} = exp(U_{x}^{t}*h)$. Insted, in the linear assumption $P_{x}^{t,h} = [I-U_{x}^{t}*h/2][I+U_{x}^{t}*h/2]^{-1}$
+
+In this way, we can obtain the matrix of probabilities:
+
+$$P_{x}^{t,h} =  \left(\begin{array}{cccc} 
+                 p_{x,11}^{t,h} & p_{x,12}^{t,h} & \cdots & p_{x,1s}^{t,h} & p_{x,1d}^{t,h}\\ 
+                 p_{x,21}^{t,h} & \ddots & \cdots & p_{x,2s}^{t,h} & p_{x,2d}^{t,h}\\
+                 \vdots & \vdots & \ddots & \vdots & \vdots\\ 
+                 p_{x,s1}^{t,h} & \cdots & \cdots & p_{x,ss}^{t,h} & p_{x,sd}^{t,h}\\
+                 0 & 0 & \cdots & \cdots & 1
+                 \end{array}\right)$$
+
+We have n states with n-1 transitions each, characterizing a row (or col, depending the arrangement) stochastic transition matrix.
+In the case of demographic-health multistate model, we only can observe s-1 states distribution at initial time (dead portion is unobservable), so we typical have a matrix transition with $p_{x,ij}^{t,h}$, meaning the probability that a person aged x at time t make a transition from i to j, during the interval h. We have $s$ living states and one $dead$ state (absorbing state).
+
+$$\left(\begin{array}{c} 
+      N_{x,1}^t\\
+      N_{x,2}^t\\
+      \vdots\\
+      N_{x,s}^t\\
+      0\\
+      \end{array}\right)^T
+      P_{x}^{t,h} = 
+      \left(\begin{array}{c} 
+      N_{x+h,1}^{t+h}\\
+      N_{x+h,2}^{t+h}\\
+      \vdots\\
+      N_{x+h,s}^{t+h}\\
+      N_{x+h,d}^{t+h}\\
+      \end{array}\right)^T$$
+      
+The indetermination problem arise from algebra theory, where knowing both $N$ vectors, we have more variables than equations (in the "observable case"  $s*(s-1)>(s+1)$). So, additional information must be taked for the parameter estimation. The most common one is to suppose homogeneus mortality, reducing $(s-1)$ parameters for mortality depending initial states,  to 1. In this case there are algebraical solutions for $s<4$ (Schoen, 2016; ???). 
+
+But it's known that this assumption is not respected in the vast majority of the diseases, so some overall conditions for its resolution can be added (to the stochastic condition $\sum_{i=1}^{s} p_{x,ij}^{t,h} + p_{x,id}^{t,h} = 1$), which can be classified in:   
+* Relationship between magnitudes of probabilities in each age (in general terms $p_{x,ij}^{t,h}>=<p_{x,ko}^{t,h}$ for $i\neq k$ or $j \neq o$)   
+* Relationship between ages for the same transition rate (parametric form or just inequalities between values)   
+
+Lets consider the case of "strictly" herachical systems, in which all states are not necessarily reachable from any given state. These are acceptable for many progressive diseases like cancer, diabetes, hypertension, and many others. 
+Here we'll concentrate in the case of two living states with differential mortality. The diagram of states and its transition matrix are like this:  
+
+```{r echo=FALSE, message=FALSE}
+#http://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html
+library('DiagrammeR')
+grViz(
+diagram="
+      digraph bboxes_and_circles{
+      graph [overlap = true, fontsize = 10]
+      node [shape = circle,
+              fixedsize = true,
+              width = 0.9]
+      H->D; U->D; H->H; U->U; D->D 
+      {rank=same ; H -> U };
+       } ",
+width = 200, height = 200)
+ 
+```
+  
+  $$U_{x}^{t} = \left(\begin{array}{ccc} 
+                 -(m_{x,12}^{t}+m_{x,1d}^{t})   &    m_{x,12}^{t}    &     m_{x,1d}^{t}\\ 
+                 0   &    -m_{x,2d}^{t}    &  m_{x,2d}^{t}\\
+                 0 & 0 & 0
+                \end{array}\right)$$
+  
+So, we have 3 incognits and 2 equations in the observable case. One property of that kind of transition structure is that we have an upper triangular matrix, with $p_{x,ij}^{t,h}=0$ for $i<j$. 
+We'll explore different kinds of resolution gave from the demography field, and its differents ways of treating additional information about relative risk.
+
+#Data
+
+We'll test three very different methods that had been used in the demography field in last years. The first one is  
+
+```{r include=FALSE}
+
+```
+
+##IPF Method
+Iterative proportional fitting (IPF) is a non parametric proccedure to fit an array to a column and a row marginals (fit a contingency table), which has the same total count. The basic idea is find succesive row and column factors that replicates marginals. 
+
+It has been proven (Demig and Stephan, 1940) that there is a unique solution that minimize the diference. This solution maximizes entropy, so it gives us the most uncertain scenario about flows, and without any structure in the results.
+The geranal framework is the estimation of log-linear models
+This methodology can handle structural zeroes (known values), which is tycical of chronic diseases.
+
+Option 1
+Make a three dimensional array fitting IPF: age and states at t and t+h, where targets would be the bidimensional marginals. In this case, instead of need a shape for the realite risk of mortality, one needs an overall index.
+
+
+
+``` {r include=FALSE}
+
+````
+
+
+##DI Mehtod (Schmertmann)
+
+
+##Guillot-Yu
+
+
+##B-spline smooth
+
+
+
+
+
+
+
+
+
+
+
+
+
+##Data
+The source that we will use is the National Risk Factor Survey from Argentina, which collect data about health perception and risk factors like diabetes, hypertension, cholesterol and many others.  
+
+```{r echo=FALSE, message=FALSE}
+library(dplyr)
+source('Data/Data.R')
+enfr13r <- enfr13 %>%
+        filter(BIHA01==1) %>%
+        group_by(BHCH05) %>%
+        summarise(total  = length(ID[PREVALENCIA_HIPERTENSION>0]),
+                  s0 = length(ID[PREVALENCIA_HIPERTENSION>1]),
+                  s1 = length(ID[PREVALENCIA_HIPERTENSION==1 & (BIAC01_01>1 & BIAC01_02>1)]),
+                  s2 = length(ID[PREVALENCIA_HIPERTENSION==1 & (BIAC01_01==1 | BIAC01_02==1)]))
+barplot(rbind(enfr13r$s0/enfr13r$total,enfr13r$s1/enfr13r$total,enfr13r$s2/enfr13r$total),names.arg = enfr13r$BHCH05)
+```
+
+
+
+
+

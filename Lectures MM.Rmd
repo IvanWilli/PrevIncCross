@@ -1,9 +1,0 @@
----
-title: "Lecture MM"
-output: html_document
----
-
-Ogurtsova, E. (2014). Estimating transition rates for multistate models from panel data and repeated cross-
-sections
-2.2
-Information contained for each individual stochastic process $(X_t,t>0)$ in  interval [0,t) are the number and time distribution to other states visits. Maybe rewards too.
