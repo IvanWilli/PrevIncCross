@@ -54,7 +54,7 @@ But it's known that this assumption is not respected in the vast majority of the
 * Relationship between magnitudes of probabilities in each age (in general terms $p_{x,ij}^{t,h}>=<p_{x,ko}^{t,h}$ for $i\neq k$ or $j \neq o$)   
 * Relationship between ages for the same transition rate (parametric form or just inequalities between values)   
 
-Lets consider the case of "strictly" herachical systems, in which all states are not necessarily reachable from any given state. These are acceptable for many progressive diseases like cancer, diabetes, hypertension, and many others. 
+Let's consider the case of "strictly" herachical systems, in which all states are not necessarily reachable from any given state. These are acceptable for many progressive diseases like cancer, diabetes, hypertension, and many others. 
 Here we'll concentrate in the case of two living states with differential mortality. The diagram of states and its transition matrix are like this:  
 
 ```{r echo=FALSE, message=FALSE}
@@ -91,15 +91,73 @@ We'll test three very different methods that had been used in the demography fie
 
 ```
 
-##IPF Method
-Iterative proportional fitting (IPF) is a non parametric proccedure to fit an array to a column and a row marginals (fit a contingency table), which has the same total count. The basic idea is find succesive row and column factors that replicates marginals. 
 
-It has been proven (Demig and Stephan, 1940) that there is a unique solution that minimize the diference. This solution maximizes entropy, so it gives us the most uncertain scenario about flows, and without any structure in the results.
-The geranal framework is the estimation of log-linear models
-This methodology can handle structural zeroes (known values), which is tycical of chronic diseases.
 
-Option 1
-Make a three dimensional array fitting IPF: age and states at t and t+h, where targets would be the bidimensional marginals. In this case, instead of need a shape for the realite risk of mortality, one needs an overall index.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

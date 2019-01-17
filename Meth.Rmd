@@ -1,0 +1,81 @@
+---
+title: "Meth"
+output: html_document
+---
+
+##IPF Method
+
+Iterative proportional fitting (IPF) is a non parametric proccedure to fit an array to a column and a row marginals already set with the same total count. The basic idea is to find succesive row and column factors that replicates marginals (Schoen, 2003). 
+
+preserves cross-product ratio
+
+Se trata de un modelo 'saturado', ya que el numero de parametros es igual al de las celdas con valor no cierto (Bishop, 2002).
+
+tabla triangular (incompleta). se usa misma metodolog'ia q con completas, pero dejando como estado inical con 0
+
+
+
+Se enmarca en el tratamiento de muestras de individuos segmentados por dos o m[as categorias. Con poblaciones grandes el muestreo puede considerarse sin reposicion. 
+Cada celda es una variable aleatoria con, con una esperanza de conteo
+
+For each age there would be a contingency table, where the letter $e$ indicates the events in each cell. 
+
+$$P_{x}^{t} =  \left(\begin{array}{cccc} 
+                &  & \pi_{x,1}^{t+1} & \pi_{x,2}^{t+1} & \pi_{x,d}^{t+1}\\
+                &  & \cdots & \cdots & \cdots\\
+                \pi_{x,1}^{t} & \vdots & e_{x,11}^{t} & e_{x,12}^{t} & e_{x,1d}^{t}\\ 
+                \pi_{x,1}^{t} & \vdots & 0 & e_{x,22}^{t} & e_{x,1d}^{t}\\ 
+                 \end{array}\right)$$
+
+Siendo la probabilidad de que cualquier individuo tomado al azar sea parte de la transicion $ij$, el valor $e_{x,22}/$
+
+It has been proven that there is a unique solution that minimize the diference (Demig and Stephan, 1940). This solution maximizes entropy, so it gives us the most uncertain scenario about flows, and without any structure in the results. One advantage is that can handle structural zeroes, which is tycical in chronic diseases where remission is not possible.
+
+The general framework is the estimation of log-linear models
+
+For each target distribution, we need to know the "observable" distribution and a general mortality for $\pi_{x,d}^{t+1}$ that would be probability of death from official life tables. 
+Instead of doing the proccedure for each age, we will arrange a matrix that contain all the contingency tables for all ages in its diagonal. The final probability can be obtained in each row, in relation with the departure prevalence.  
+
+
+
+
+
+
+
+
+# r-method
+Schmertmann (2002) proposed a model for prevalence change using two cross-sectional sources. This change can be decomposed into a intra-cohort effect, final objective of the methodology, non-negative in our case (incidence but not remission), and extra-cohort effects, like net-migration and death. In a closed population, only the last change is considered and is weigthed by the prevalence of those who leave the cohort. A disadvantaje of this method is that needs external information about differential mortality.   
+
+The prevalence of those who die is given by $k_{x}^{t} \pi_{x}^{t}$, being  $k_{x}^{t} = \frac{\mu_{x,2d}^{t}}{\mu_{x,*d}^{t}}$. The dinamic equation would be, for exact age-time prevalence:
+$$(\pi_{x}^{t})^{'} = \mu_{x,12}^{t} - \mu_{x,*d}^{t} (k_{x}^{t} - 1)\pi_{x}^{t}$$
+  
+  The derivative of the prevalence can be decomposed in partial derivatives, age and period effect: $(\pi_{x}^{t})^{'} = \frac{\partial\pi_{x}^{t}}{\partial t} \frac{\partial\pi_{x}^{x}}{\partial x}$. The key in his development is the linear aproximation of those measures in a short period $h$. For example, for the age effect we need to take the $h$ average effect of changing age in both periods:
+
+$$\frac{\partial\pi_{x}^{t}}{\partial t} \approx \frac{1}{2} [\frac{\pi_{x+h}^{t}-\pi_{x}^{t}}{h} + \frac{\pi_{x+h}^{t+h}-\pi_{x}^{t+h}}{h}]$$. 
+
+An analogic calculus is done with period effect, and then average both. For the next step is required an estimation for the prevalence cohort during the exposition to dead, averaging corner values in the Lexis rectangle $(x,t), (x+h,t), (x,t+h), (x+h,t+h)$: $\bar{\pi}_{x,h}^{t,h}=[\pi_{x}^{t}+\pi_{x+h}^{t}+\pi_{x}^{t+h}+\pi_{x+h}^{t+h}]\frac{1}{4}$. 
+
+Finally the estimated incidence rate $\mu_{x,12}^{t}$ is calculated from the dinamic equation.
+
+
+
+# Parametric optimization
+
+This method is based in Guillot and Yu (2009), and consists in give a parametric shape to $p_{x,12}^{t,h}$ and $rr_{x}^{t,h}$ and insert this function in the "observable" cohort transition $\bar{\pi}_{x+h}^{t+h} = \bar{\pi}_{x}^{t} (1-p_{x,12}^{t,h}-p_{x,1d}^{t,h})$. 
+
+
+Previously, an initial relationship between subgroups mortality must done $p_{x,*d}^{t,h} = \pi_{x}^{t}*p_{x,1d}^{t,h} + (1-\pi_{x}^{t})*p_{x,2d}^{t,h}$, which results in this expression of the not healhty mortality.
+
+
+$$p_{x,1d}^{t,h} = \frac{p_{x,*d}^{t,h}}{\pi_{x}^{t}+(1-\pi_{x}^{t})*rr_{x}^{t,h}}$$
+
+Knowing the overall mortality and with the assumption of $p_{x,12}^{t,h}=a_{1}e^{b_{1}x}$ and $rr_{x}^{t,h}=a_{2}e^{b_{2}x}$, there is a $age * 4$ system of equations, with constraints about the possible values of probabilities (between 0 and 1) and relative risk (greater than 1) and conservative bounds for the parametric shapes, than can be estimated with numerical methods.
+
+The problem then is to find $k*=[a_{1}*,a_{2}*,b_{1}*,b_{2}*]$, such that minimize objective function, in this case the $MSE$ subject to the restrictions mentioned. Due to the non-linear relationships, and to the existence of derivative conditions with respect to x, we are facing a non-linear optimization problem with restrictions (Burden, 2002). The resolution technique is framed in the so-called sequential (of successive resolution of an optimization problem in each iteration), and is based on a Increased Lagrange function (Lagrange multipliers to incorporate constraints with inequalities, and a penalty term to force the direction of successive results, hence the "augmented") (Madsen et al., 2004).
+
+
+
+
+
+
+
