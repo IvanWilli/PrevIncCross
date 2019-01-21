@@ -1,71 +1,69 @@
-#### Data
 
-prev1 = c(N$N0_nh,0)
-prev2 = c(0,N$N1_nh)
-no_prev1 = 1 - prev1
-no_prev2 = 1 - prev2
-q = N$p_hd*N$N0_h+N$p_nhd*N$N0_nh
-plot(N$p_hd);points(N$p_nhd,col=2);points(q,col=4)
 
-###Formas funcionales por edad (se le llama inc a q(HTA) erróneamente)
-
-rr<-function(x) {a1*exp(x*b1)}
-der_rr<-function(x) {a1*b1*exp(x*b1)}
-inc<-function(x) {a2*exp(x*b2)}
-der_inc<-function(x) {a2*b2*exp(x*b2)}
+result = GY_f(N$N0_nh, N$N1_nh, N$p_d, 
+              a1.li, a1.ls, b1.li, b1.ls, a2.li, a2.ls, b2.li, b2.ls)
 
 #### estimacion
 
-library("alabama")
-set.seed(2378)
-solOk_0913<-data.frame(a1=NA,b1=NA,a2=NA,b2=NA,c2=NA,
-                       con=NA, val=NA, err=NA)
-n_sim=1
-for (i in 1:n_sim){
+GY_f = function(N0_nh, N1_nh, q, 
+                a1.li, a1.ls, b1.li, b1.ls, a2.li, a2.ls, b2.li, b2.ls){
+  
+  # N0_nh = N$N0_nh
+  # N1_nh = N$N1_nh
+  # q = N$p_d
+  
+  #### Prepara data
+  prev1 = N0_nh
+  prev2 = N1_nh
+  
+  #optimization
+  solOk_0913<-data.frame(a1=NA,b1=NA,a2=NA,b2=NA,c2=NA, con=NA, val=NA, err=NA)
+  
+  library("alabama")
+  set.seed(2378)
+  
   sol0913<-auglag_funcion(prev1,prev2,q)
+  
   solOk_0913[i,]<-head(sol0913[order(sol0913$val),],2)[1,]
+  
+  #### resultados
+  
+  sol0913=subset(solOk_0913,!is.na(err))
+  
+  p_hnh.hat<-data.frame()
+  rr.hat<-data.frame()
+  
+  for (i in 1:nrow(sol0913)){
+    a1<-sol0913[i,1]; b1<-sol0913[i,2]
+    a2<-sol0913[i,3]; b2<-sol0913[i,4]; c2<-sol0913[i,5]
+    ord<-1
+    for (j in 30:79) {
+      p_hnh.hat[i,ord]<-inc(j)
+      rr.hat[i,ord]<-rr(j)
+      ord<-ord+1}
+  }
+  
+  p_hnh.hat = as.numeric(p_hnh.hat)
+  rr.hat = as.numeric(rr.hat)
+  no_prev1 = 1 - prev1
+  no_prev2 = 1 - prev2
+  p_hd <- as.numeric(q/(no_prev1+prev1 * rr.hat))
+  p_nhd <- as.numeric(p_hd * rr.hat)
+  
+  out = data.frame(p_hnh.hat=p_hnh.hat, rr.hat=rr.hat, p_hd=p_hd, p_nhd=p_nhd)
+  
+  return(out)
 }
-
-#### resultados
-
-sol0913=subset(solOk_0913,!is.na(err))
-
-p_hnh.hat<-data.frame()
-rr.hat<-data.frame()
-
-for (i in 1:nrow(sol0913)){
-  a1<-sol0913[i,1]; b1<-sol0913[i,2]
-  a2<-sol0913[i,3]; b2<-sol0913[i,4]; c2<-sol0913[i,5]
-  ord<-1
-  for (j in 30:79) {
-    p_hnh.hat[i,ord]<-inc(j)
-    rr.hat[i,ord]<-rr(j)
-    ord<-ord+1}
-}
-
-p_hd <- q/(no_prev1+prev1 * rr.hat)
-p_nhd <- p_hd * rr.hat
-
-plot(30:79, p_hnh, cex = 0.8, main = 'H->NH', ylim=c(0,0.12), xlab = '', ylab='Probability')
-points(30:79, p_hnh.hat, cex = 0.8, col=2)
-# plot(p_hnh.hat/p_hnh, ylim=c(1,1.5)) # siempre sobreestima
-
-plot(30:79, p_hd, cex = 0.8, main = 'H->D', xlab = '', ylab='Probability')
-points(30:79, p_hd.hat, cex = 0.8, col=2)
-# plot(p_hd.hat/p_hd) # siempre subestima +++
-
-plot(30:79, p_nhd, cex = 0.8, main = 'NH->D', ylim=c(0,0.05), xlab = 'Age', ylab='Probability')
-points(30:79, p_nhd.hat, cex = 0.8, col=2) # +++
-# plot(p_nhd.hat/p_nhd) # siempre sobreestima +++
-
-
-
-
-
 
 ##############aulag
 
 auglag_funcion<-function(prev1, prev2, q){
+  
+  ###Formas funcionales por edad (se le llama inc a q(HTA) erróneamente)
+  rr<-function(x) {a1*exp(x*b1)}
+  der_rr<-function(x) {a1*b1*exp(x*b1)}
+  inc<-function(x) {a2*exp(x*b2)}
+  der_inc<-function(x) {a2*b2*exp(x*b2)}
   
   #complemento (sanos)
   Noprev1<-1-prev1
@@ -75,9 +73,8 @@ auglag_funcion<-function(prev1, prev2, q){
   
   Y<-c();B<-c();C<-c();D<-c()
   
-  interval=1
   for (i in 1:length(q)){
-    Y[i]<-Noprev2[i+interval]-Noprev1[i]/(1-q[i])
+    Y[i]<-Noprev2[i]-Noprev1[i]/(1-q[i])
     B[i]<-Noprev1[i]*q[i]/(1-q[i])
     C[i]<-Noprev1[i]
     D[i]<-Noprev1[i]/(1-q[i])}
@@ -139,8 +136,8 @@ auglag_funcion<-function(prev1, prev2, q){
   m<-30:79 #edades de chekeo de restr
   a1<-c();b1<-c();a2<-c();b2<-c()
   
-  for (i in 1:10){ #si se quiere se puede randomizar la solución inicial. Converge
-    
+  for (i in 1:1){ #si se quiere se puede randomizar la solución inicial. Converge
+    # i = 11
     randoma1<-runif(1)
     randomb1<-runif(1)
     randoma2<-runif(1)
@@ -154,6 +151,7 @@ auglag_funcion<-function(prev1, prev2, q){
     #optim
     solucion <- auglag(par=iniciales, fn=fn, hin=hin, heq=heq,
                        control.outer = list(itmax= 300, method="nlminb"))
+    
     #control de soluciones
     soluciones[i,1]<-solucion$par[1]
     soluciones[i,2]<-solucion$par[2]
@@ -165,13 +163,60 @@ auglag_funcion<-function(prev1, prev2, q){
     soluciones[i,8]<-0
     a1<<-soluciones[i,1];b1<<-soluciones[i,2]
     a2<<-soluciones[i,3];b2<<-soluciones[i,4]
-    for (j in m) {
-      if (inc(j)<0 | inc(j)>1 | der_inc(j)<0 | 
-          rr(j)<1 | rr(j)>10 | der_rr(j)>0)
+    
+    
+      if (any(inc(m)<0) | any(inc(m)>1) | any(der_inc(m)<0) | 
+          any(rr(m)<1) | any(rr(m)>10) | any(der_rr(m)>0))
       {soluciones[i,8]<-1}
-    }
+    
   }
   solOK<-subset(soluciones, soluciones$err==0)
   return(solOK)
 }
+
+############bandas
+
+###set de bandas para rr y q(HTA)
+
+#rr
+rr_li<-c(2,1)
+rr_ls<-c(6,2.5)
+x_l<-c(Can$age_li[1],Can$age_li[11])
+dat_li=data.frame(rr_li,x_l)
+dat_ls=data.frame(rr_ls,x_l)
+model_li <- lm(log(rr_li) ~ x_l + 1) 
+model_ls <- lm(log(rr_ls) ~ x_l + 1)
+x <- data.frame(x_l=seq(30,80,5))
+pred_li_rr<-data.frame(x=x,p=exp(predict(model_li,x)))
+pred_ls_rr<-data.frame(x=x,p=exp(predict(model_ls,x)))
+a1.li<-exp(model_li$coefficients[1])
+b1.li<-model_li$coefficients[2]
+a1.ls<-exp(model_ls$coefficients[1])
+b1.ls<-model_ls$coefficients[2]
+
+#gráfico de bandas
+plot(pred_ls_rr$x_l, pred_ls_rr$p, t='o', ylim = c(1,6))
+points(pred_li_rr$x_l, pred_li_rr$p, t='o')
+points(Can$age_avg, Can$Can_rr, t='o', lty=2)
+points(N$Age, N$rr, t='o', lty=2)
+
+#p(HTA)
+inc_li<-c(.001, .02)
+inc_ls<-c(.01, 0.2)
+x_l<-c(Can$age_li[1],Can$age_li[11])
+model_li <- lm(log(inc_li) ~ x_l + 1) 
+model_ls <- lm(log(inc_ls) ~ x_l + 1)
+x <- data.frame(x_l=seq(30,80,5))
+pred_li_inc<-data.frame(x=x,p=exp(predict(model_li,x)))
+pred_ls_inc<-data.frame(x=x,p=exp(predict(model_ls,x)))
+a2.li<-exp(model_li$coefficients[1])
+b2.li<-model_li$coefficients[2]
+a2.ls<-exp(model_ls$coefficients[1])
+b2.ls<-model_ls$coefficients[2]
+
+#gráfico de bandas
+plot(pred_ls_inc$x_l, pred_ls_inc$p, t='o', ylim = c(0,.2))
+points(pred_li_inc$x_l, pred_li_inc$p, t='o')
+points(N$Age, N$p_hnh, t='o', lty=2)
+
 

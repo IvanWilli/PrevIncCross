@@ -96,6 +96,9 @@ img {
 button.code-folding-btn:focus {
   outline: none;
 }
+summary {
+  display: list-item;
+}
 </style>
 
 
@@ -103,14 +106,74 @@ button.code-folding-btn:focus {
 <div class="container-fluid main-container">
 
 <!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
 });
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
 </script>
 
 <!-- code folding -->
-
 
 
 
@@ -128,10 +191,8 @@ $(document).ready(function () {
 <div id="ipf-method" class="section level2">
 <h2>IPF Method</h2>
 <p>Iterative proportional fitting (IPF) is a non parametric proccedure to fit an array to a column and a row marginals already set with the same total count. The basic idea is to find succesive row and column factors that replicates marginals (Schoen, 2003).</p>
-<p>preserves cross-product ratio</p>
-<p>Se trata de un modelo ‘saturado’, ya que el numero de parametros es igual al de las celdas con valor no cierto (Bishop, 2002).</p>
-<p>tabla triangular (incompleta). se usa misma metodolog’ia q con completas, pero dejando como estado inical con 0</p>
-<p>Se enmarca en el tratamiento de muestras de individuos segmentados por dos o m[as categorias. Con poblaciones grandes el muestreo puede considerarse sin reposicion. Cada celda es una variable aleatoria con, con una esperanza de conteo</p>
+<p>The general framework is the use of log-linear models with a total count constraint, that considere the same two factor-efect (cross-product ratio). The IPF converges to MLE for every initial values (Demig and Stephan, 1940).</p>
+<p>It’s a satured model (equal cells than parameters) with a solution that maximizes entropy, so it gives us the most uncertain scenario about flows, and without any aditional structure in the results than in the marginals (Bishop, 2002). One advantage is that can handle structural zeroes (incomplete table), which is typical in chronic diseases where remission is not possible.</p>
 <p>For each age there would be a contingency table, where the letter <span class="math inline">\(e\)</span> indicates the events in each cell.</p>
 <p><span class="math display">\[P_{x}^{t} =  \left(\begin{array}{cccc} 
                 &amp;  &amp; \pi_{x,1}^{t+1} &amp; \pi_{x,2}^{t+1} &amp; \pi_{x,d}^{t+1}\\
@@ -139,10 +200,8 @@ $(document).ready(function () {
                 \pi_{x,1}^{t} &amp; \vdots &amp; e_{x,11}^{t} &amp; e_{x,12}^{t} &amp; e_{x,1d}^{t}\\ 
                 \pi_{x,1}^{t} &amp; \vdots &amp; 0 &amp; e_{x,22}^{t} &amp; e_{x,1d}^{t}\\ 
                  \end{array}\right)\]</span></p>
-<p>Siendo la probabilidad de que cualquier individuo tomado al azar sea parte de la transicion <span class="math inline">\(ij\)</span>, el valor <span class="math inline">\(e_{x,22}/\)</span></p>
-<p>It has been proven that there is a unique solution that minimize the diference (Demig and Stephan, 1940). This solution maximizes entropy, so it gives us the most uncertain scenario about flows, and without any structure in the results. One advantage is that can handle structural zeroes, which is tycical in chronic diseases where remission is not possible.</p>
-<p>The general framework is the estimation of log-linear models</p>
-<p>For each target distribution, we need to know the “observable” distribution and a general mortality for <span class="math inline">\(\pi_{x,d}^{t+1}\)</span> that would be probability of death from official life tables. Instead of doing the proccedure for each age, we will arrange a matrix that contain all the contingency tables for all ages in its diagonal. The final probability can be obtained in each row, in relation with the departure prevalence.</p>
+<p>Being the probability that an individual in state <span class="math inline">\(i\)</span> transitate <span class="math inline">\(j\)</span> <span class="math inline">\(\frac{e_{x,12}^{t}}{\pi_{x,1}^{t}}\)</span>.</p>
+<p>For each target distribution, we need to know the “observable” distribution and a general mortality for <span class="math inline">\(\pi_{x,d}^{t+1}\)</span> that would be the probability of mortality from official life tables. Instead of doing the proccedure for each age, we will arrange a matrix that contain all the contingency tables for all ages in its diagonal, so we dont have to loop the proccedure. The final probability can be obtained in each row, in relation with the departure prevalence.</p>
 </div>
 <div id="r-method" class="section level1">
 <h1>r-method</h1>

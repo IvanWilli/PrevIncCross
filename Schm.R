@@ -1,29 +1,52 @@
 
 ########################### EDAD SIMPLE
 
-# edad exacta por splines
-N_Schm = data.frame(N, m = Can_m_s[-51], rr = Can_rr_s[-51])
-plot(N_Schm$N0_nh, t='l')
-lines(N_Schm$N1_nh, col=4)
-N_Schm$N0_nh-N_Schm$N1_nh
+R_funct = function(N0_nh, N1_nh, p_d, p_nhd){
+  
+  # incidence rate
+  
+  n = 1
+  t = 1
+  
+  A = N0_nh[-51]
+  D = N1_nh[-51]
+  B = N0_nh[-1]
+  C = N0_nh[-1]
+  
+  #A = N0_nh
+  #D = N1_nh
+  #B = c(N0_nh[-1], Can_prev_s[51])
+  #C = c(N0_nh[1], N1_nh[-1])
+  #length(A);length(D);length(B);length(C)
+  
+  i0 = (1/(2*n)+1/(2*t))*(C-A)+ (1/(2*n)-1/(2*t))*(B-D)
+  
+  i1 = i0 + (p_nhd - p_d) * (A+B+C+D)/4
+  
+  #plot(i0); points(i1, col=2)
+  
+  # convertirlo en probabilidad
+  p_hnh.hat.r = i1 / (1-N0_nh[-51])
+  
+  return(data.frame(p_hnh.hat = p_hnh.hat.r))
+}
 
-# mortalidad gral
-m_gral = N_Schm$m*N_Schm$rr*Can_prev_s[-51]+N_Schm$m*(1-Can_prev_s[-51])
-plot(m_gral)
-points(N_Schm$m, col=4)
-points(N_Schm$m*N_Schm$rr, col=2)
+R_funct(c(N$N0_nh, Can_prev_s[51]), c(N$N0_nh[1], N$N1_nh), N$p_d, N$p_nhd)
 
-# incidence rate
-i = (1/2/1+1/2/1)*(N_Schm$N1_nh[-1]-N_Schm$N0_nh[-50]
-                   +N_Schm$N0_nh[-1]-N_Schm$N1_nh[-50])
 
-i = i + m_gral[-50] * (N_Schm$rr[-50]-1) * (N_Schm$N1_nh[-1]+N_Schm$N0_nh[-50]+
-                                              N_Schm$N0_nh[-1]+N_Schm$N1_nh[-50])/4
 
-# graph
-plot(log(Can_inc_s))
-points(log(i), col=3)
-plot(i/Can_inc_s)
+
+
+
+
+
+
+
+
+
+
+
+
 
 ########################## QUINQUENAL
 

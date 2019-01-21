@@ -9,34 +9,34 @@ age_li = c(seq(20,85,5))
 age_ls = c(seq(24,84,5),99)
 age_avg = (age_li+(age_ls+1))/2
 age_group = paste0(age_li,'-',age_ls)
+
 Can = data.frame(age_group, age_li, age_ls, age_avg, Can_prev, Can_inc, Can_m, Can_rr)
 
 ## take from 30 to 80
 Can = Can[Can$age_li >= 30 & Can$age_li <= 80,]
 
-# graph
-g1 = cbind(Can[,-c(6,7,8)], PrInc = 'Prev'); g1$val = g1$Can_prev; g1$Can_prev = NULL
-g2 = cbind(Can[,-c(5,7,8)], PrInc = 'Inc'); g2$val = g2$Can_inc; g2$Can_inc = NULL
-g3 = cbind(Can[,-c(5,6,8)], PrInc = 'm'); g3$val = g3$Can_m; g3$Can_m = NULL
-g4 = cbind(Can[,-c(5,6,7)], PrInc = 'rr'); g4$val = g4$Can_rr; g4$Can_rr = NULL
-Can_graph = rbind(g1, g2, g3, g4)
-
-library(ggplot2)
-Fig1 = ggplot(data = Can_graph[1:22,]) +
-              geom_bar(aes(x = age_group, y = val * 100, fill = PrInc),
-                       stat = "identity", position = "dodge") +
-                  labs(title = "Figure 1. Hypertension in Canada",
-                       subtitle = "2012",
-                       caption = "Source: Robitaille et.al. (2012)",
-                       x = "Age",
-                       y = "%",
-                       colour = "Gears") +
-                  theme_classic() 
-
+## graph
+par(mar=c(5, 4, 4, 6) + 0.1)
+barplot(rbind(Can$Can_prev *100, Can$Can_inc * 100),
+                main="Figure 1. Hypertension in Canada",
+                xlab="Ages", ylab = "%", ylim=c(0,80),
+                col=c("darkblue","red"),
+                legend = , beside=TRUE,
+                cex.names=1,
+                names.arg=Can$age_group)
+par(new=TRUE)
+plot(Can$Can_rr, col="green", xlab="", ylab="", ylim=c(1,3),type="l", axes=FALSE)
+points(Can$Can_rr, col="green")
+axis(4, las=1)
+mtext("rr", side = 4, line = 3)
+mtext("Source: Robitaille et.al. (2012)",side = 1, line = 4, cex = .8)
+legend("top",legend=c('Prevalence', 'Incidence', 'Relative Risk'), 
+       col = c("darkblue", "red", 3), bty = "n", lwd=c(10, 10 , 1), cex = .8)
 
 ################# EDADES SIMPLES
 
-######smooth splines
+###### smooth splines en edades exactas con pivots a miatd de intervalo
+
 ages_pred = 30:80 
 
 par(mfrow=c(2,2)) 
@@ -74,9 +74,10 @@ Can_mr_s = Can_rr_s * Can_m_s
 lines(ages_pred, log(Can_mr_s), col=4)
 legend(70, -5, c("Observed", "Healthy", "Not Healthy"), col = c(1, 2, 4), 
        lty = c(NA, 1, 1), pch = c(1, NA, NA), merge = TRUE, cex = 0.8, bty = "n")
-
-mtext("Hypertension in Canada in 2012. Observed and smoothed by spline", side = 3, line = -18, outer = TRUE)
+mtext("Hypertension in Canada in 2012. Observed and smoothed by spline", side = 3, 
+      line = -18, outer = TRUE)
 par(mfrow=c(1,1)) 
+mtext("Source: Robitaille et.al. (2012)",side = 1, line = 4, cex = .8)
 
 ## simulation population
 
@@ -84,7 +85,7 @@ par(mfrow=c(1,1))
 M = matrix(0, 3*(length(ages_pred)-1), 3*(length(ages_pred)-1))
 dim(M)
 j = 1
-for (i in seq(1,148,3)) {
+for (i in seq(1,150,3)) {
   M[i,i] = -Can_m_s[j]-Can_inc_s[j]
   M[i,i+1] = Can_inc_s[j]
   M[i,i+2] = Can_m_s[j]
@@ -96,28 +97,26 @@ sum(rowSums(M))
 
 # transition matrix probability - constant rate for the year
 library(expm)
-Q = expm(M)
+Q = expm(M * 1)
 rowSums(Q)
 
 # Poblacion Simulada
 # arregl vectorial 30:80
 
-w = length(30:80) 
+w = length(30:79) 
 N0 = matrix(rep(0,w*3))
-N0[seq(1,w*3,3)] = 1-Can_prev_s[51]
-N0[seq(2,w*3,3)] = Can_prev_s[51]
+N0[seq(1,w*3,3)] = 1-Can_prev_s[-51]
+N0[seq(2,w*3,3)] = Can_prev_s[-51]
 
-N1 = t(t(N0[-c((w*3)-2,(w*3)-1,w*3),1]) %*% Q)
+N1 = t(t(N0[,1]) %*% Q)
 
 dim(Q); length(N0); sum(N0) ; dim(N1); sum(N1) # ok
 
-Age = c() ; for (i in 30:80) {Age = append(Age, rep(i,3))}
-N0 = cbind(N0, Age)
-N1 = cbind(N1, Age+1)
+Age = c() ; for (i in 30:79) {Age = append(Age, rep(i,3))}
 
 # arreglo dataframe
 library(pracma)
-N = data.frame(Age = 30:80,
+N = data.frame(Age = 30:79,
                N0_h = N0[seq(1,w*3,3),1],
                N0_nh = N0[seq(2,w*3,3),1],
                
@@ -128,20 +127,22 @@ N = data.frame(Age = 30:80,
                p_hnh = Diag(Q,1)[seq(1,w*3,3)],
                p_hd = Diag(Q,2)[seq(1,w*3,3)],
                p_nhd = Diag(Q,1)[seq(2,w*3,3)],
-               
-               N1_h = N1[seq(1,w*3*3,3),1],
-               N1_nh = N1[seq(2,w*3*3,3),1],
-               N1_d = N1[seq(3,w*3*3,3),1])
 
+               N1_h = N1[seq(1,w*3,3),1],
+               N1_nh = N1[seq(2,w*3,3),1],
+               N1_d = N1[seq(3,w*3,3),1])
 
-# graf
+N$p_d = N$p_hd * N$N0_h + N$p_nhd * N$N0_nh
+N$rr = N$p_nhd / N$p_hd
+
+# graf chek
 par(mfrow=c(1,1))
 plot(N$Age, N$N0_h * 100, ylim=c(0,100), xlab='Age', ylab='%', main = 'Simulated population')
 points(N$Age, N$N1_h * 100, col=4)
-points(N$Age, N$N0_nh * 100, col=3)
-points(N$Age, N$N1_nh * 100, col=2)
-legend(35, 60, c("Healthy t", "Healthy t+1", "Not Healthy t", "Not Healthy t+1"), 
-       col = c(1, 2, 3, 4), pch = c(1, 1, 1, 1), cex = 0.8, bty = "n")
+# points(N$Age, N$N0_nh * 100, col=3)
+# points(N$Age, N$N1_nh * 100, col=2)
+legend(35, 60, c("Healthy t", "Healthy t+1"), 
+       col = c(1, 2), pch = c(1, 1), cex = 0.8, bty = "n")
 
 
 ################# EDADES QUINQUENALES
