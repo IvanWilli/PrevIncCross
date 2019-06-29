@@ -1,0 +1,132 @@
+---
+title: "Indirect Estimation of Transitions in Health "
+output: html_document
+---
+
+##Introduction
+The objective of this work is get used of demographic techniques to aboard the dynamic multistate problem in health models where there isn't data about flow transitions. Knowing that the goal standard information is the follow-up of life histories, here we are interested in the agreggate behaviour by age, of transitions by health states in a cronical disease.
+The epistemological question behind this approaches is well expressed by Van den Hout (2001): "Consider the case of observing the same sample proportions across the yearly age range, it cannot be inferred whether the underlying multi-state process is static in the sense that there are no transitions between the states, or completely symmetric". This idea makes sense of the needed of additional information that is requiered to restrict the infinite paths of a cohort, and the infinite combinations of the competitve events.
+
+In general, we talk about a multi-state model in a closed population, with no memory transition (Markov assumption), with only one change by period, an absorbing state (death), and with time-dependece by age. If the Markov assumption wouldn't be valid, we would need the historical distribution of $n$ $(n<x)$ past event for each cohort considered in the prevalence distribution (Caswell). The aggregate distribution of timing or duration of events must be recorded by retrospective questions, and the change between the at least two waves, must reflect incidence for sure.
+
+The matrix of transition rates (per unit of time) is the engine of life course models, and are the infinitesimal probability on change between state i to state j $m_{x,ij}^{t}$ at age x, conditional of past history. In this case we have $s$ living and a death state $d$:
+
+$$U_{x}^{t} = \left(\begin{array}{cccc} 
+                 -\sum_{i=2}^{s}m_{x,1i}^{t}-m_{x,1d}^{t} & m_{x,12}^{t} & \cdots & m_{x,1s}^{t} & m_{x,1d}^{t}\\ 
+                 m_{x,21}^{t} & \ddots & \cdots & m_{x,2s}^{t} & m_{x,2d}^{t}\\
+                 \vdots & \vdots & \ddots & \vdots & \vdots\\ 
+                 m_{x,s1}^{t} & \cdots & \cdots & -\sum_{i=1}^{s-1}m_{x,si}^{t}-m_{x,sd}^{t} & m_{x,sd}^{t}\\
+                 0 & 0 & \cdots & \cdots & 0\\
+                \end{array}\right)$$
+
+Because of its independece between intervals of time (age), a transition always can be decomposed between intermediate transitions (Chapman-Kolgoromov property), which allow to express the relationship between probability and rate (Kolgomorov forward equation), using this last $p_{ij}^{t_0,t_1+h}=\sum_{k} p_{ik}^{t_0,t_1} p_{kj}^{t_1,t_1+h}$, getting the derivative of probability $\frac{ \partial p_{ij}^{t_0,t_1+h}}{\partial h} =\sum_{k} p_{ik}^{t_0,t_1} m_{kj}^{t_1}$.
+
+For demographic purposes like decrement tables construction, the construction of a matrix of probabilities can be done with an assumption about the rates under the period risk. Under the constant assumption (time-homogeneuos) we could have an exponential (matricial) relationship $P_{x}^{t,h} = exp(U_{x}^{t}*h)$, or the linear assumption $P_{x}^{t,h} = [I-U_{x}^{t}*h/2][I+U_{x}^{t}*h/2]^{-1}$ (Schoen, 2012). In this paramtric way (which has the disadvantaje of discontinuity between intervals), we can obtain the matrix of probabilities:
+
+$$P_{x}^{t,h} =  \left(\begin{array}{cccc} 
+                 p_{x,11}^{t,h} & p_{x,12}^{t,h} & \cdots & p_{x,1s}^{t,h} & p_{x,1d}^{t,h}\\ 
+                 p_{x,21}^{t,h} & \ddots & \cdots & p_{x,2s}^{t,h} & p_{x,2d}^{t,h}\\
+                 \vdots & \vdots & \ddots & \vdots & \vdots\\ 
+                 p_{x,s1}^{t,h} & \cdots & \cdots & p_{x,ss}^{t,h} & p_{x,sd}^{t,h}\\
+                 0 & 0 & \cdots & \cdots & 1
+                 \end{array}\right)$$
+
+We have n states with n-1 transitions each, characterizing a row (or col, depending the arrangement) stochastic transition matrix.
+
+In the case of demographic-health multistate model, we only can observe s-1 states distribution each time (dead portion is unobservable). The second prevalence distribution is the theorical one (that is result of applying the model transitions) but divided by the death proportion, so distribution sum to 1. 
+
+So we typical have a matrix transition with $p_{x,ij}^{t,h}$, meaning the probability that a person aged x at time t make a transition from i to j, during the interval h. We have $s$ living states and one $dead$ state (absorbing state).
+
+$$\left(\begin{array}{c} 
+      N_{x,1}^t\\
+      N_{x,2}^t\\
+      \vdots\\
+      N_{x,s}^t\\
+      0\\
+      \end{array}\right)^T
+      P_{x}^{t,h} = 
+      \left(\begin{array}{c} 
+      N_{x+h,1}^{t+h}\\
+      N_{x+h,2}^{t+h}\\
+      \vdots\\
+      N_{x+h,s}^{t+h}\\
+      N_{x+h,d}^{t+h}\\
+      \end{array}\right)^T$$
+      
+The indetermination problem arise from algebra theory, where knowing both $N$ vectors, we have more variables than equations ($s*(s-1)>(s+1)$). So, additional information must be taked for the parameter estimation. The most common one is to suppose homogeneus mortality, reducing $(s-1)$ parameters for mortality depending initial states, to 1. In this case there are algebraical solutions for $s<4$ (Schoen, 2016). 
+
+But it's known that this assumption is not respected in the vast majority of the diseases, so some overall conditions for its resolution can be added (to the stochastic condition $\sum_{i=1}^{s} p_{x,ij}^{t,h} + p_{x,id}^{t,h} = 1$), which can be classified in:   
+* Relationship between magnitudes of probabilities in each age (in general terms $p_{x,ij}^{t,h}>=<p_{x,ko}^{t,h}$ for $i\neq k$ or $j \neq o$)   
+* Relationship between ages for the same transition rate (parametric form or just inequalities between values)   
+
+Let's consider the case of "strictly" herachical systems, in which all states are not necessarily reachable from any given state. These are acceptable for many progressive diseases like cancer, diabetes, hypertension, and many others. 
+Here we'll concentrate in the case of two living states with differential mortality. The diagram of states and its transition matrix are like this:  
+
+```{r echo=FALSE, message=FALSE}
+#http://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html
+library('DiagrammeR')
+grViz(
+diagram="
+      digraph bboxes_and_circles{
+      graph [overlap = true, fontsize = 10]
+      node [shape = circle,
+              fixedsize = true,
+              width = 0.9]
+      H->D; U->D; H->H; U->U; D->D 
+      {rank=same ; H -> U };
+       } ",
+width = 200, height = 200)
+ 
+```
+  
+$$M_{x}^{t} = \left(\begin{array}{ccc} 
+                 -(m_{x,HU}^{t}+m_{x,HD}^{t})   &    m_{x,HU}^{t}    &     m_{x,HD}^{t}\\ 
+                 0   &    -m_{x,UD}^{t}    &  m_{x,UD}^{t}\\
+                 0 & 0 & 0
+                \end{array}\right)$$
+  
+So, we have 3 incognits and 2 equations in the observable case. One property of that kind of transition structure is that we have an upper triangular matrix, with $p_{x,ij}^{t,h}=0$ for $i<j$. 
+We'll explore different kinds of resolution gave from the demography field, and its differents ways of treating additional information about relative risk.
+
+# Previous experience
+
+The first schematic apporach was done by Moffit (1993), thinking in succesive samples of a stochastic process, and stating that the undetermined problem can be arise only with two states and non symmetric. Other approaches using markov chains was donde but the need an important amount of waves fot maximum likehood estimators (Pelzer, 2005).  
+From the demography field there were researchers that already treated this problem. Keiding (2013) trated the problem as an stationary population, and with addiotional information about morality needed. Davis(2001) estimated unconditional health expectancies using a logistic parametrisation of age-varying state probabilities. Schmertmann (2009) used a linear approach to the prevalence change decomposing intra-cohort effects. Finally Guillot and Yu (2009) gave a paramertric shape to transitions and estimated by optimization proccedures. 
+
+# Ways of test accuracy
+Microsimulation of a Markov process of life histories, with different intervals and transition shapes by age, getting "pictures" of its agreggate composition by state. In this case we prefer the application to a real longitudinal data as first step. Ogurtsova (2014) used 10 waves of the HRS. 
+
+##Data
+Which condition defines the event in a disease? Diagnostic, feeling, memory?
+Cross-sectional data has the advantajege of being representative of a population ab its principal attributes, because generally comes from a complex survey design, but the personas in each wave are differents.
+The source that we will use is the National Risk Factor Survey from Argentina, which collect data about health perception and risk factors like diabetes, hypertension, cholesterol and many others.  
+
+```{r echo=FALSE, message=FALSE}
+library(dplyr)
+source('Data/Data.R')
+enfr13r <- enfr13 %>%
+        filter(BIHA01==1) %>%
+        group_by(BHCH05) %>%
+        summarise(total  = length(ID[PREVALENCIA_HIPERTENSION>0]),
+                  s0 = length(ID[PREVALENCIA_HIPERTENSION>1]),
+                  s1 = length(ID[PREVALENCIA_HIPERTENSION==1 & (BIAC01_01>1 & BIAC01_02>1)]),
+                  s2 = length(ID[PREVALENCIA_HIPERTENSION==1 & (BIAC01_01==1 | BIAC01_02==1)]))
+barplot(rbind(enfr13r$s0/enfr13r$total,enfr13r$s1/enfr13r$total,enfr13r$s2/enfr13r$total),names.arg = enfr13r$BHCH05)
+```
+
+
+#Data
+
+We'll test three very different methods that had been used in the demography field in last years. The first one is  
+
+# future items
+* Sigmoidial function to parametric optimization (Nusselder and Peeters, 2006)
+* Eisinga (2008) designed a software tool called CrossMark.
+* B-spline (Titman, 2011)
+
+* k subrgoups increase not only the number of variables to estimate, also de global restrictions because of its socio-econpomic heararchy in the transition level and structure.
+
+# Bibliography
+Ogurtsova, E. (2014). Estimating transition rates for multistate models from panel data and repeated cross-
+sections. University of Groningen.
+

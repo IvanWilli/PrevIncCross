@@ -8,8 +8,9 @@ R_funct = function(N0_nh, N1_nh, p_d, p_nhd){
   n = 1
   t = 1
   
-  A = N0_nh[-51]
-  D = N1_nh[-51]
+
+  A = N0_nh[-41]
+  D = N1_nh[-41]
   B = N0_nh[-1]
   C = N0_nh[-1]
   
@@ -21,17 +22,21 @@ R_funct = function(N0_nh, N1_nh, p_d, p_nhd){
   
   i0 = (1/(2*n)+1/(2*t))*(C-A)+ (1/(2*n)-1/(2*t))*(B-D)
   
-  i1 = i0 + (p_nhd - p_d) * (A+B+C+D)/4
+  i1 = i0
+  # i1 = i0 + (p_nhd - p_d) * (A+B+C+D)/4
   
   #plot(i0); points(i1, col=2)
   
   # convertirlo en probabilidad
-  p_hnh.hat.r = i1 / (1-N0_nh[-51])
+  p_hnh.hat.r = i1 / (1-N0_nh[-41])
   
   return(data.frame(p_hnh.hat = p_hnh.hat.r))
 }
 
-R_funct(c(N$N0_nh, Can_prev_s[51]), c(N$N0_nh[1], N$N1_nh), N$p_d, N$p_nhd)
+
+
+
+R_funct(c(N$N0_nh, Can_prev_s[41]), c(N$N0_nh[1], N$N1_nh), N$p_d, N$p_nhd)
 
 
 

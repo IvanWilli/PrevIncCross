@@ -3,11 +3,13 @@ title: "Meth"
 output: html_document
 ---
 
+Here we'll try fit non parametric and parametric models. The last one incorporates an assumption about the age estructure of rates.
+
 ##IPF Method
 
-Iterative proportional fitting (IPF) is a non parametric procedure to fit an array to a column and a row marginals already set with the same total count. The basic idea is to find successive row and column factors that replicates marginals (Schoen, 2003). 
+Iterative proportional fitting (IPF) is a very known non parametric procedure to fit an array to a column and a row marginals already set with the same total count. The basic idea is to find successive row and column factors that replicates marginals (Schoen, 2003). 
 
-The general framework is the use of log-linear models with a total count constraint, that consider the same two factor-effect (cross-product ratio). The IPF converges to MLE for every initial values  (Demig and Stephan, 1940). 
+The general framework is the use of log-linear models with a total count constraint, that consider the same two factor-effect (cross-product ratio), so high order interactions are dismissed. The IPF converges to MLE (unqiue set of row and column factors) for every initial values (Demig and Stephan, 1940).  Schoen (2003) propose an aditional arrangement of cells, called relative state attraction method, for giving to simmetry events an interpretation of contrary forces, inspired by matrix migration models, but the results are quiet simmilar to IPF, so we'll apply the basic approach. 
 
 It's a saturated model (equal cells than parameters) with a solution that maximizes entropy, so it gives us the most uncertain scenario about flows, and without any additional structure in the results than in the marginals (Bishop, 2002). One advantage is that can handle structural zeroes (incomplete table), which is typical in chronic diseases where remission is not possible.
 
@@ -25,37 +27,11 @@ Being the probability that an individual in state $i$ transit ate $j$ $\frac{e_{
 For each target distribution, we need to know the "observable" distribution and a general mortality for $\pi_{x,d}^{t+1}$ that would be the probability of mortality from official life tables. 
 Instead of doing the procedure for each age, we will arrange a matrix that contain all the contingency tables for all ages in its diagonal, so we don't have to loop the procedure. The final probability can be obtained in each row, in relation with the departure prevalence.  
 
+In a demographic view, the result rates are those who...  
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## r-method
-Schmertmann (2002) proposed a model for prevalence change using two cross-sectional sources. This change can be decomposed into a intra-cohort effect, final objective of the methodology, non-negative in our case (incidence but not remission), and extra-cohort effects, like net-migration and death. In a closed population, only the last change is considered and is weigthed by the prevalence of those who leave the cohort. A disadvantaje of this method is that needs external information about relative risk ratio against overall mortality.   
+## r-variable
+Schmertmann (2002) proposed a model for prevalence change using two cross-sectional sources. It is based in non-stable generalization, where there is an attribute that change with age, independetly of its decrement and increments at each age (Coale, 1985). This change can be decomposed into a intra-cohort effect, final objective of the methodology, non-negative in our case (incidence but not remission), and extra-cohort effects, like net-migration and death. In a closed population, only the last change is considered and is weigthed by the prevalence of those who leave the cohort. A disadvantaje of this method is that needs external information about relative risk ratio against overall mortality.   
 
 The dinamic equation would be, for exact age-time prevalence (smoothed previously):
 $$(\pi_{x}^{t})^{'} = \delta_{x,12}^{t} - \mu_{x,*d}^{t} (k_{x}^{t} - 1)\pi_{x}^{t}$$
@@ -71,24 +47,7 @@ An analogical calculus is done with period effect, and then average both. For th
 Finally the estimated probability can be calculated like $\frac{\delta_{x,12}^{t}}{1-\pi_{x}^{t}}$.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Parametric optimization
+# Intercensal method
 
 This method is based in Guillot and Yu (2009), and consists in give a parametric shape to $p_{x,12}^{t,h}$ and $rr_{x}^{t,h}$ and insert this function in the "observable" cohort transition $\bar{\pi}_{x+h}^{t+h} = \bar{\pi}_{x}^{t} (1-p_{x,12}^{t,h}-p_{x,1d}^{t,h})$. 
 

@@ -1,0 +1,12 @@
+---
+title: "Reves"
+output: html_document
+---
+
+* Trasnition estimates during all adult life
+Incidence is lowers above 70s beacuse of a frailty effect in healthy cohorts. The question is which is this frailty model behind this plateau of indicdence in crhonical diseases. 
+
+* Guillot Yu with logistic incidence to catch olders in chronical diseases
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2563971/pdf/448.pdf
+
+* Review of indirect methodologies and impact in the life expectancy

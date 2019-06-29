@@ -1,7 +1,6 @@
 
 
-result = GY_f(N$N0_nh, N$N1_nh, N$p_d, 
-              a1.li, a1.ls, b1.li, b1.ls, a2.li, a2.ls, b2.li, b2.ls)
+# result = GY_f(N$N0_nh, N$N1_nh, N$p_d, a1.li, a1.ls, b1.li, b1.ls, a2.li, a2.ls, b2.li, b2.ls)
 
 #### estimacion
 
@@ -37,7 +36,7 @@ GY_f = function(N0_nh, N1_nh, q,
     a1<-sol0913[i,1]; b1<-sol0913[i,2]
     a2<-sol0913[i,3]; b2<-sol0913[i,4]; c2<-sol0913[i,5]
     ord<-1
-    for (j in 30:79) {
+    for (j in 30:69) {
       p_hnh.hat[i,ord]<-inc(j)
       rr.hat[i,ord]<-rr(j)
       ord<-ord+1}
@@ -80,7 +79,7 @@ auglag_funcion<-function(prev1, prev2, q){
     D[i]<-Noprev1[i]/(1-q[i])}
   
   #edades de cohortes al 2009
-  x<-30:79
+  x<-30:69
   
   #función objetivo
   fn<-function(p){
@@ -90,9 +89,9 @@ auglag_funcion<-function(prev1, prev2, q){
   #sistema de restricciones de desigualdad (bandas)
   hin<-function(p){
     
-    h <- rep(NA, 80)
+    h <- rep(NA, 70)
     cont<-1
-    for (k in seq(30,79,1)){
+    for (k in seq(30,69,1)){
       #rr
       h[cont] <- p[1]*exp(k*p[2])-a1.li*exp(k*b1.li)
       cont<-cont+1
@@ -133,7 +132,7 @@ auglag_funcion<-function(prev1, prev2, q){
   #loopeo soluciones
   soluciones<-data.frame(a1=NA,b1=NA,a2=NA,b2=NA,c2=NA,con=NA, val=NA, err=NA)
   
-  m<-30:79 #edades de chekeo de restr
+  m<-30:69 #edades de chekeo de restr
   a1<-c();b1<-c();a2<-c();b2<-c()
   
   for (i in 1:1){ #si se quiere se puede randomizar la solución inicial. Converge
@@ -180,13 +179,13 @@ auglag_funcion<-function(prev1, prev2, q){
 
 #rr
 rr_li<-c(2,1)
-rr_ls<-c(6,2.5)
-x_l<-c(Can$age_li[1],Can$age_li[11])
+rr_ls<-c(4,2.5)
+x_l<-c(Can$age_li[1],Can$age_ls[8])
 dat_li=data.frame(rr_li,x_l)
 dat_ls=data.frame(rr_ls,x_l)
 model_li <- lm(log(rr_li) ~ x_l + 1) 
 model_ls <- lm(log(rr_ls) ~ x_l + 1)
-x <- data.frame(x_l=seq(30,80,5))
+x <- data.frame(x_l=seq(30,70,5))
 pred_li_rr<-data.frame(x=x,p=exp(predict(model_li,x)))
 pred_ls_rr<-data.frame(x=x,p=exp(predict(model_ls,x)))
 a1.li<-exp(model_li$coefficients[1])
@@ -202,11 +201,11 @@ points(N$Age, N$rr, t='o', lty=2)
 
 #p(HTA)
 inc_li<-c(.001, .02)
-inc_ls<-c(.01, 0.2)
-x_l<-c(Can$age_li[1],Can$age_li[11])
+inc_ls<-c(.01, 0.15)
+x_l<-c(Can$age_li[1],Can$age_li[8])
 model_li <- lm(log(inc_li) ~ x_l + 1) 
 model_ls <- lm(log(inc_ls) ~ x_l + 1)
-x <- data.frame(x_l=seq(30,80,5))
+x <- data.frame(x_l=seq(30,69,5))
 pred_li_inc<-data.frame(x=x,p=exp(predict(model_li,x)))
 pred_ls_inc<-data.frame(x=x,p=exp(predict(model_ls,x)))
 a2.li<-exp(model_li$coefficients[1])

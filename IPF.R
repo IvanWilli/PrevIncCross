@@ -1,12 +1,12 @@
 ################## IPF
 
-# requiero estados observables
+# requiero estados observables en 0 pero no en 1
 
 IPF_f = function(N0, N1){
 
   library('mipfp')
-  seed <- matrix(0, 150, 150)
-  for (i in seq(1,150,3)){
+  seed <- matrix(0, 120, 120)
+  for (i in seq(1,120,3)){
     # i=1
     seed[i:(i+2),i:(i+2)] = matrix(c(1,1,1,
                                     0,1,1,
@@ -29,9 +29,16 @@ IPF_f = function(N0, N1){
 
   library(pracma)
   
-  p_hnh.hat.ipf = Diag(r.ipfp$x.hat / target.row, 1)[seq(1,150,3)]
-  p_hd.hat.ipf = Diag(r.ipfp$x.hat / target.row,2)[seq(1,150,3)] 
-  p_nhd.hat.ipf = Diag(r.ipfp$x.hat / target.row,1)[seq(2,150,3)] 
+  # class(r.ipfp$x.hat)
+  # class(target.row)
+  # dim(r.ipfp$x.hat)
+  # dim(target.row)
+  # r.ipfp$x.hat / as.numeric(target.row)
+  # 0.9722406/0.97625550
+  
+  p_hnh.hat.ipf = Diag(r.ipfp$x.hat / as.numeric(target.row), 1)[seq(1,120,3)]
+  p_hd.hat.ipf = Diag(r.ipfp$x.hat / as.numeric(target.row),2)[seq(1,120,3)] 
+  p_nhd.hat.ipf = Diag(r.ipfp$x.hat / as.numeric(target.row),1)[seq(2,120,3)] 
   N1_nh.hat.ipf = N$N0_nh * (1-p_nhd.hat.ipf) + N$N0_h * p_hnh.hat.ipf
   
   out = data.frame(p_hnh.hat.ipf, p_hd.hat.ipf, p_nhd.hat.ipf, N1_nh.hat.ipf)
@@ -42,7 +49,7 @@ IPF_f = function(N0, N1){
   return(out)
 }
 
-# IPF_f(N0, N1, Q)
+# IPF_f(N0, N1)
 
 
 
